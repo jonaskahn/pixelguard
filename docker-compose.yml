@@ -1,0 +1,31 @@
+services:
+  pixelguard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jonaskahn/pixelguard
+    container_name: pixelguard
+    ports:
+      - "8000:8000" # API port
+      - "8501:8501" # Streamlit port
+    environment:
+      - PYTHONPATH=/app
+      - DEBUG=true
+      - WORKERS=10
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/log/supervisor
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
